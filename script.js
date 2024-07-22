@@ -139,14 +139,14 @@ async function displayFirstPage(pdf) {
 	};
 	await page.render(renderContext).promise();
 
-	// Place the crop square in the center with default -0.01% crop ratios
+	// Place the crop square in the center with default 0% crop ratios
 	const width = canvas.width;
 	const height = canvas.height;
 
-	const topPercent = -0.01;
-	const bottomPercent = -0.01;
-	const leftPercent = -0.01;
-	const rightPercent = -0.01;
+	const topPercent = -0;
+	const bottomPercent = -0;
+	const leftPercent = -0;
+	const rightPercent = -0;
 
 	cropSquare.style.width = `${width * (1 - leftPercent - rightPercent)}px`;
 	cropSquare.style.height = `${height * (1 - topPercent - bottomPercent)}px`;
