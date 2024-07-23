@@ -1,32 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Split PDF in half</title>
-  <link rel="stylesheet" href="styles.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Crop PDF with JS</title>
+	<style>
+		#output, #result {
+			margin-top: 20px;
+			border: 1px solid #000;
+			padding: 10px;
+			max-height: 400px;
+			overflow-y: auto;
+		}
+		#progress-container {
+			display: none;
+			margin-top: 20px;
+		}
+		#canvas-container {
+			position: relative;
+			margin-top: 20px;
+			border: 1px solid black;
+			width: fit-content;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		#pdf-canvas {
+			border: 1px solid black;
+		}
+		#crop-square {
+			position: absolute;
+			border: 1px solid red;
+			cursor: move;
+			display: none;
+		}
+		.handle {
+			position: absolute;
+			width: 10px;
+			height: 10px;
+			background: red;
+		}
+		.top-left {
+			top: -5px;
+			left: -5px;
+			cursor: nwse-resize;
+		}
+		.top-right {
+			top: -5px;
+			right: -5px;
+			cursor: nesw-resize;
+		}
+		.bottom-left {
+			bottom: -5px;
+			left: -5px;
+			cursor: nesw-resize;
+		}
+		.bottom-right {
+			bottom: -5px;
+			right: -5px;
+			cursor: nwse-resize;
+		}
+		.middle-top {
+			top: -5px;
+			left: 50%;
+			transform: translateX(-50%);
+			cursor: ns-resize;
+		}
+		.middle-right {
+			top: 50%;
+			right: -5px;
+			transform: translateY(-50%);
+			cursor: ew-resize;
+		}
+		.middle-bottom {
+			bottom: -5px;
+			left: 50%;
+			transform: translateX(-50%);
+			cursor: ns-resize;
+		}
+		.middle-left {
+			top: 50%;
+			left: -5px;
+			transform: translateY(-50%);
+			cursor: ew-resize;
+		}
+	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+	<script src="https://unpkg.com/pdf-lib@1.11.1"></script>
+	<script src="script.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Split PDF in half</h1>
-    <input type="file" id="pdf-upload" accept="application/pdf">
-    <p id="page-count"></p>
-    <label for="page-ranges">Enter pages to split:</label>
-    <input type="text" id="page-ranges" placeholder="e.g. 2, 4, 6-70" onkeydown="if(event.key === 'Enter') splitPdf()">
-    <div>
-      <label for="mode-switch">5% Extended Split Mode</label>
-      <input type="checkbox" id="mode-switch">
-    </div>
-    <button id="split-button">Split PDF</button>
-    <div id="progress-container" class="progress-container">
-      <progress id="progress-bar" value="0" max="100"></progress>
-      <span id="progress-percentage">0%</span>
-    </div>
-    <a id="download-link" style="display: none;"></a>
-  </div>
-  <p class="bottom">
-  try out the <a href="/crop-pdf-with-js/">JS PDF cropper</a></p>
-  <script src="https://unpkg.com/pdf-lib@1.11.1"></script>
-  <script src="script.js"></script>
+	<h1>Crop PDF with JS</h1>
+	<p>a Javascript PDF cropping tool</p>
+	<input type="file" id="pdf-upload" accept="application/pdf">
+	<div id="output"></div>
+	<div>
+		<label for="top-percent">Top Crop (%)</label>
+		<input type="number" id="top-percent" value="-0.01" min="-100" max="100">
+		<label for="bottom-percent">Bottom Crop (%)</label>
+		<input type="number" id="bottom-percent" value="-0.01" min="-100" max="100">
+		<label for="left-percent">Left Crop (%)</label>
+		<input type="number" id="left-percent" value="-0.01" min="-100" max="100">
+		<label for="right-percent">Right Crop (%)</label>
+		<input type="number" id="right-percent" value="-0.01" min="-100" max="100">
+	</div>
+	<button id="split-button">Split PDF</button>
+	<div id="progress-container">
+		<progress id="progress-bar" value="0" max="100"></progress>
+		<span id="progress-percentage">0%</span>
+	</div>
+	<div id="canvas-container" style="display:none;">
+		<canvas id="pdf-canvas"></canvas>
+		<div id="crop-square">
+			<div class="handle top-left"></div>
+			<div class="handle top-right"></div>
+			<div class="handle bottom-left"></div>
+			<div class="handle bottom-right"></div>
+			<div class="handle middle-top"></div>
+			<div class="handle middle-right"></div>
+			<div class="handle middle-bottom"></div>
+			<div class="handle middle-left"></div>
+		</div>
+	</div>
+	<div id="result"></div>
 </body>
 </html>
